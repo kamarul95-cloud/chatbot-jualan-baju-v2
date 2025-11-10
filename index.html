@@ -165,17 +165,17 @@ animation: bounce 1.2s infinite ease-in-out;
 40% { transform: translateY(-5px); }
 }
 
-/* KEKALKAN GAYA INPUT TEXT (Sudah Cantik) */
-.input-area input[type="text"] {
-flex-grow: 1;
-padding: 10px 15px;
-border: none;
-border-radius: 20px;
-box-shadow: none;
-background-color: #ffffff;
-min-height: 40px;
-box-sizing: border-box;
-}
+/* UNTUK KOTAK TEKS S1 & S3 */
+        .input-area input[type="text"] {
+            flex-grow: 1; /* Mesti ada untuk mengambil baki ruang */
+            padding: 10px 15px; /* Padding yang lebih baik */
+            border: none;
+            border-radius: 20px;
+            box-shadow: none; /* Buang shadow lama */
+            background-color: #ffffff; /* Pastikan ia putih */
+            min-height: 40px; 
+            box-sizing: border-box; 
+        }
 
 /* KEMBALIKAN GAYA DEFAULT UNTUK BUTANG PETAK/BUJUR */
 .input-area button {
@@ -220,15 +220,6 @@ padding: 8px 10px;
 font-weight: normal;
 text-align: left;
 border-radius: 10px !important;
-}
-
-.form-input {
-width: 100%;
-padding: 8px;
-margin-bottom: 5px;
-border: 1px solid #ccc;
-border-radius: 5px;
-box-sizing: border-box;
 }
 
 @media (max-width: 600px) {
