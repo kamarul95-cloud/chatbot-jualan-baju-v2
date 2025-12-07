@@ -2,7 +2,7 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>Urusetia Jualan - Official Chat</title>
     <style>
         /* --- 1. GLOBAL VARIABLES & RESET --- */
@@ -100,7 +100,10 @@
             padding-bottom: 20px;
             display: flex;
             flex-direction: column;
-            scroll-behavior: smooth;
+            scroll-behavior: smooth; /* Smooth scroll effect */
+            
+            /* Trick untuk pastikan content sentiasa push dari bawah jika perlu (optional)
+               tapi standard WA start dari atas. Kita control via JS scrollToBottom */
         }
 
         /* Scrollbar cantik */
@@ -146,6 +149,7 @@
             border-radius: 6px;
             margin-top: 5px;
             margin-bottom: 2px;
+            display: block; /* Fix layout shift */
         }
 
         /* Bot (Kiri) */
@@ -584,7 +588,12 @@
             audioSent.pause();
             audioSent.currentTime = 0;
         }).catch(e => console.log("Audio unlock failed", e));
+        
+        // Setup initial view
         initBot();
+        
+        // Listeners tambahan untuk keyboard mobile
+        setupMobileViewportFix();
     }
 
     function playSound(type) {
@@ -608,7 +617,30 @@
     }
 
     function scrollToBottom() {
-        chatBox.scrollTop = chatBox.scrollHeight;
+        // Guna requestAnimationFrame untuk pastikan DOM dah update
+        requestAnimationFrame(() => {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+    
+    // --- FUNGSI PENTING: Fix Mobile Keyboard ---
+    function setupMobileViewportFix() {
+        // 1. Bila user tekan input (Keyboard naik) -> Scroll ke bawah
+        textInput.addEventListener('focus', () => {
+            setTimeout(scrollToBottom, 300); // Delay sikit tunggu keyboard naik
+        });
+        
+        // 2. Guna VisualViewport API (Modern browsers)
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                scrollToBottom();
+            });
+        }
+        
+        // 3. Window resize fallback
+        window.addEventListener('resize', () => {
+            scrollToBottom();
+        });
     }
 
     // --- FUNGSI BARU: Force Download ---
@@ -673,6 +705,13 @@
                 chatBox.insertBefore(msgDiv, typingBubble);
                 playSound(sender === 'user' ? 'sent' : 'recv');
                 scrollToBottom();
+                
+                // Extra check utk imej
+                const imgs = msgDiv.getElementsByTagName('img');
+                if(imgs.length > 0) {
+                    imgs[0].onload = () => scrollToBottom();
+                }
+
                 resolve();
             }, delay);
         });
