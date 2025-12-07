@@ -611,6 +611,29 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    // --- FUNGSI BARU: Force Download ---
+    async function forceDownload(url, filename) {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            // Cleanup memory
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+            
+        } catch (e) {
+            console.error('Force download failed, fallback to new tab', e);
+            window.open(url, '_blank');
+        }
+    }
+
     /* =========================================
        UI INTERACTION FUNCTIONS
        ========================================= */
@@ -688,7 +711,6 @@
         textInput.disabled = false;
         textInput.focus();
         
-        // Buang elemen choices lama (kecuali jika kita dalam loop tambah saiz, tapi processStep dipanggil bila dah setel)
         const existingChoices = document.querySelectorAll('.choice-container-wrapper');
         existingChoices.forEach(el => el.remove());
 
@@ -715,12 +737,34 @@
 
         let qText = currentQ.Question.replace("{{name}}", userData.name);
         
+        // --- LOGIK QR CODE DIKEMASKINI ---
         if(currentQ.Type === 'image') {
             await addMessage(qText, 'bot');
             const imgUrl = currentQ.Options || DUMMY_QR;
+            
+            // 1. Tunjuk Imej
             await addMessage(`<img src="${imgUrl}" alt="QR Code">`, 'bot', 200);
-            await addMessage("Sila muat naik resit pembayaran anda di bawah.", 'bot', 500);
+
+            // 2. Tunjuk Butang Download (Guna appendChild supaya tak kacau urutan)
+            const dlWrapper = document.createElement('div');
+            dlWrapper.className = 'choice-container-wrapper';
+            dlWrapper.style.cssText = "display:flex; justify-content:center; margin-top:5px; margin-bottom:10px;";
+            
+            dlWrapper.innerHTML = `
+                <button class="choice-btn" style="text-decoration:none; display:flex; align-items:center; gap:5px; color:#111; cursor:pointer;" onclick="forceDownload('${imgUrl}', 'QR_Pembayaran.jpg')">
+                   <span>⬇️</span> Muat Turun QR
+                </button>
+            `;
+            
+            chatBox.insertBefore(dlWrapper, typingBubble);
+            scrollToBottom();
+
+            // 3. Tunjuk Arahan Seterusnya
+            await addMessage("Sila muat naik resit pembayaran anda di bawah.", 'bot', 800);
+            
+            // 4. Render Butang Upload
             renderUploadUI();
+            
             isProcessing = false;
             return;
         }
@@ -742,7 +786,6 @@ Resit: ${uploadedReceiptUrl.includes('http') ? '✅ Diterima' : '❌ Tiada'}
         await addMessage(qText, 'bot');
 
         if(currentQ.Type === 'choices') {
-            // Reset tempCart bila masuk step choices
             tempCart = []; 
             renderChoicesUI(currentQ.Options.split(','));
             textInput.disabled = true; 
@@ -1091,7 +1134,9 @@ Resit: ${uploadedReceiptUrl.includes('http') ? '✅ Diterima' : '❌ Tiada'}
             'Saiz Lain (Spesifikasi)': customSizes.join(', ') || '-',
             'Jumlah Kuantiti (Total)': totalQty,
             
-            'Status Pembayaran': uploadedReceiptUrl.includes('http') ? 'Selesai' : 'Pending',
+            // --- KEMASKINI STATUS PEMBAYARAN DI SINI ---
+            'Status Pembayaran': uploadedReceiptUrl.includes('http') ? 'Selesai' : 'Menunggu Pembayaran',
+            
             'Nama Fail Resit': uploadedReceiptUrl
         };
         
