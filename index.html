@@ -773,7 +773,11 @@
             questions = [
                 {Field_ID: '1', Question: "Hai nak order baju **HOODIE WINDBREAKER PEMUDA PAS KUALA NERUS** ke?", Type: 'choices', Options: "YA!"},
                 {Field_ID: '2', Question: "Alhamdulillah. Boleh berikan **Nama Penuh** anda?", Type: 'text'},
-                {Field_ID: '3', Question: "Sila pilih saiz baju yang anda mahu. (Rujuk carta saiz di bawah pilihan 👇)", Type: 'choices', Options: "XS, S, M, L, XL, 2XL, 3XL, 4XL, 5XL, Lain-lain"},
+                
+                // --- KEMASKINI: Saiz Terhad (S, M, L, XL, XXL) Sahaja ---
+                // NOTA PENTING: Senarai saiz penuh asal (Backup) -> "XS, S, M, L, XL, 2XL, 3XL, 4XL, 5XL, Lain-lain"
+                {Field_ID: '3', Question: "Sila pilih saiz baju yang anda mahu. (Rujuk carta saiz di bawah pilihan 👇)", Type: 'choices', Options: "S, M, L, XL, XXL"},
+                
                 {Field_ID: '4', Question: "Baik. Boleh berikan **Nombor Telefon** untuk dihubungi?", Type: 'text'},
                 {Field_ID: '5', Question: "Sila buat pembayaran ke akaun tertera.", Type: 'image', Options: DUMMY_QR},
                 {Field_ID: '6', Question: "Sila upload resit pembayaran anda.", Type: 'upload'},
@@ -1219,8 +1223,12 @@ Resit: ${uploadedReceiptUrl.includes('http') ? '✅ Diterima' : '❌ Tiada'}
         let totalQty = 0;
 
         userData.sizeQty.forEach(item => {
-            if (sizeCounts.hasOwnProperty(item.size.toUpperCase())) {
-                sizeCounts[item.size.toUpperCase()] += item.qty;
+            // --- KEMASKINI: Handle XXL mapping ke 2XL untuk backend ---
+            let s = item.size.toUpperCase();
+            if (s === 'XXL') s = '2XL';
+
+            if (sizeCounts.hasOwnProperty(s)) {
+                sizeCounts[s] += item.qty;
             } else {
                 customSizes.push(`${item.size} (${item.qty})`);
             }
