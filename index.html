@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-    <title>Urusetia Jualan - Official Chat</title>
+    <title>Tempahan Hoodie Windbreaker</title>
     <style>
         /* --- 1. GLOBAL VARIABLES & RESET --- */
         :root {
@@ -14,6 +14,7 @@
             --wa-bot-msg: #ffffff;
             --wa-blue-tick: #53bdeb;
             --wa-check-grey: #999999;
+            --pas-green: #006400; /* Hijau PAS */
         }
 
         * {
@@ -66,7 +67,12 @@
             height: 40px;
             border-radius: 50%;
             margin-right: 12px;
-            background: #fff url('https://cdn-icons-png.flaticon.com/512/4712/4712035.png') center/cover;
+            background-color: #fff;
+            /* Logo PNG dari GitHub */
+            background-image: url('https://raw.githubusercontent.com/kamarul95-cloud/hostqamarul/fc589452b8232856afc0ea6e0b81faaaa7feada4/logo%20pemuda.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             flex-shrink: 0;
         }
 
@@ -79,9 +85,13 @@
 
         .header-info h2 {
             margin: 0;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 500;
             line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 250px;
         }
 
         .header-info .status {
@@ -218,7 +228,6 @@
             margin-right: 3px;
         }
         
-        /* Tick Icon Container - tidak perlu width tetap, biar ikut img */
         .tick-icon {
             display: inline-flex;
             align-items: center;
@@ -517,7 +526,7 @@
         
         <div class="profile-pic"></div>
         <div class="header-info">
-            <h2>Urusetia Jualan</h2>
+            <h2>Pemuda PAS Kuala Nerus</h2>
             <div id="header-status" class="status">online</div>
         </div>
         
@@ -558,10 +567,17 @@
     /* =========================================
        CONFIG & DATA VARIABLES
        ========================================= */
+    // Simpan GOOGLE_SHEET_URL yang asal (untuk hantar data)
     const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwU0RSESTNpE8I0fEsTfaTBF5zOccvWLp0iLTvMsXwAcZFONroxNjYMK46zoQKDspVjiQ/exec';
+    
+    // Fallback CSV (Jika nak guna sheet, pastikan structure sama). 
+    // Tapi kita akan guna "Hardcoded Flow" untuk request terbaru ini.
     const CSV_QUESTION_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_V0WwvfHF5eIPQsfUQIEQ4y6-sz7O_qxV8WBnucYVAXTxafSBE8QIde604Hjb3XiZZRKMjpfGRHmv/pub?gid=0&single=true&output=csv';
     const IMGBB_API_KEY = '07c44a986353977c2a4907218d19dc1d';
+    
+    // Link Gambar QR & Size Chart
     const DUMMY_QR = 'https://raw.githubusercontent.com/kamarul95-cloud/qrcode/refs/heads/main/IMG-20251105-WA0114.jpg';
+    const SIZE_CHART_URL = 'https://raw.githubusercontent.com/kamarul95-cloud/hostqamarul/9ab9b84b289eb36a2b532f4f7e269229e5ac514f/size%20chart%20windbreaker.jpg';
 
     // Audio Assets
     const audioSent = new Audio("https://cdn.pixabay.com/audio/2022/11/25/audio_651a14eb84.mp3"); // Tik
@@ -750,18 +766,20 @@
 
     async function initBot() {
         try {
-            questions = await fetchQuestions(); 
-            if(questions.length === 0) {
-                console.warn("Gagal tarik CSV, guna fallback data.");
-                questions = [
-                    {Field_ID: '1', Question: "Hai! Selamat datang ke Urusetia Jualan. Boleh saya tahu nama anda?", Type: 'text'},
-                    {Field_ID: '2', Question: "Hi **{{name}}**. Sila pilih saiz baju yang anda mahu.", Type: 'choices', Options: "XS, S, M, L, XL, 2XL, 3XL, Lain-lain"},
-                    {Field_ID: '3', Question: "Baik. Boleh berikan nombor telefon untuk dihubungi?", Type: 'text'},
-                    {Field_ID: '4', Question: "Sila buat pembayaran ke akaun tertera.", Type: 'image', Options: DUMMY_QR},
-                    {Field_ID: '5', Question: "Sila upload resit pembayaran anda.", Type: 'upload'},
-                    {Field_ID: '6', Question: "Sila sahkan butiran tempahan anda.", Type: 'confirm'}
-                ];
-            }
+            // Kita bypass fetchQuestions CSV sebab nak guna Custom Flow yang client minta
+            // Tapi structure data mesti kekal sama
+            
+            // --- CUSTOM FLOW QUESTIONS (Hardcoded untuk kelajuan) ---
+            questions = [
+                {Field_ID: '1', Question: "Hai nak order baju **HOODIE WINDBREAKER PEMUDA PAS KUALA NERUS** ke?", Type: 'choices', Options: "YA!"},
+                {Field_ID: '2', Question: "Alhamdulillah. Boleh berikan **Nama Penuh** anda?", Type: 'text'},
+                {Field_ID: '3', Question: "Sila pilih saiz baju yang anda mahu. (Rujuk carta saiz di bawah pilihan 👇)", Type: 'choices', Options: "XS, S, M, L, XL, 2XL, 3XL, 4XL, 5XL, Lain-lain"},
+                {Field_ID: '4', Question: "Baik. Boleh berikan **Nombor Telefon** untuk dihubungi?", Type: 'text'},
+                {Field_ID: '5', Question: "Sila buat pembayaran ke akaun tertera.", Type: 'image', Options: DUMMY_QR},
+                {Field_ID: '6', Question: "Sila upload resit pembayaran anda.", Type: 'upload'},
+                {Field_ID: '7', Question: "Sila sahkan butiran tempahan anda.", Type: 'confirm'}
+            ];
+            
             processStep();
         } catch (e) {
             console.error(e);
@@ -797,7 +815,6 @@
             await addMessage('Dibina oleh Qamar', 'credit-message', 1000);
             
             // 2. Icon WhatsApp (Guna Imej PNG)
-            // Nota: Saya ubah width/height ke 24 supaya muat dalam butang
             const waIcon = `<img width="24" height="24" src="https://img.icons8.com/cute-clipart/64/whatsapp.png" alt="whatsapp" style="vertical-align: middle; margin-right: 8px;">`;
             
             const btnHtml = `<div class="choice-container-wrapper" style="display:flex; justify-content:center; margin-top:10px;">
@@ -818,7 +835,7 @@
 
         let qText = currentQ.Question.replace("{{name}}", userData.name);
         
-        // --- LOGIK QR CODE DIKEMASKINI ---
+        // --- LOGIK QR CODE ---
         if(currentQ.Type === 'image') {
             await addMessage(qText, 'bot');
             const imgUrl = currentQ.Options || DUMMY_QR;
@@ -826,7 +843,7 @@
             // 1. Tunjuk Imej
             await addMessage(`<img src="${imgUrl}" alt="QR Code">`, 'bot', 200);
 
-            // 2. Tunjuk Butang Download (Guna appendChild supaya tak kacau urutan)
+            // 2. Tunjuk Butang Download
             const dlWrapper = document.createElement('div');
             dlWrapper.className = 'choice-container-wrapper';
             dlWrapper.style.cssText = "display:flex; justify-content:center; margin-top:5px; margin-bottom:10px;";
@@ -865,6 +882,9 @@ Resit: ${uploadedReceiptUrl.includes('http') ? '✅ Diterima' : '❌ Tiada'}
         }
 
         await addMessage(qText, 'bot');
+        
+        // NOTA: Kita dah buang logik addMessage(Image) manual kat sini
+        // Gambar akan dimasukkan dalam renderChoicesUI di bawah
 
         if(currentQ.Type === 'choices') {
             tempCart = []; 
@@ -882,11 +902,11 @@ Resit: ${uploadedReceiptUrl.includes('http') ? '✅ Diterima' : '❌ Tiada'}
         const val = textInput.value.trim();
         if(!val) return;
 
-        if(step === 1 && val.length < 3) { alert("Nama terlalu pendek"); return; }
-        if(step === 3 && val.length < 9) { alert("Nombor telefon tidak sah"); return; }
+        if(step === 2 && val.length < 3) { alert("Nama terlalu pendek"); return; }
+        if(step === 4 && val.length < 9) { alert("Nombor telefon tidak sah"); return; }
 
-        if(step === 1) userData.name = val;
-        if(step === 3) userData.phone = val;
+        if(step === 2) userData.name = val;
+        if(step === 4) userData.phone = val;
 
         addMessage(val, 'user');
         textInput.value = '';
@@ -921,31 +941,64 @@ Resit: ${uploadedReceiptUrl.includes('http') ? '✅ Diterima' : '❌ Tiada'}
             const btn = document.createElement('div');
             btn.className = 'choice-btn';
             btn.innerText = opt;
-            btn.onclick = () => openQtyModal(opt, wrapper); 
+            
+            // Jika Step 1 (Intro), butang YA sahaja, behavior lain sikit (terus next step)
+            if(step == 1) {
+                btn.onclick = () => {
+                    wrapper.remove();
+                    addMessage(opt, 'user');
+                    step++;
+                    processStep();
+                };
+            } else {
+                // Jika step saiz (Step 3), buka modal kuantiti
+                btn.onclick = () => openQtyModal(opt, wrapper); 
+            }
+            
             btnsContainer.appendChild(btn);
         });
 
         // 3. Container Butang Selesai (Section Soalan "Ada lagi?")
+        // Hanya tunjuk jika bukan Step 1 (Intro)
         const finishDiv = document.createElement('div');
-        finishDiv.id = 'finish-section-ui';
-        finishDiv.className = 'choice-container';
-        finishDiv.style.width = '100%';
-        finishDiv.style.display = 'none'; // Sembunyi sampai ada 1 item
-        
-        finishDiv.innerHTML = `
-            <div class="finish-section">
-                <div class="finish-label">Adakah anda ingin menambah saiz lain?</div>
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1; text-align:center; font-size:12px; color:#999; padding-top:10px;">(Pilih butang saiz di atas 👆)</div>
-                    <button class="choice-btn primary" onclick="finishSizeSelection(this)" style="flex:1;">✅ Selesai, Teruskan</button>
+        if(step !== 1) {
+            finishDiv.id = 'finish-section-ui';
+            finishDiv.className = 'choice-container';
+            finishDiv.style.width = '100%';
+            finishDiv.style.display = 'none'; // Sembunyi sampai ada 1 item
+            
+            finishDiv.innerHTML = `
+                <div class="finish-section">
+                    <div class="finish-label">Adakah anda ingin menambah saiz lain?</div>
+                    <div style="display:flex; gap:10px;">
+                        <div style="flex:1; text-align:center; font-size:12px; color:#999; padding-top:10px;">(Pilih butang saiz di atas 👆)</div>
+                        <button class="choice-btn primary" onclick="finishSizeSelection(this)" style="flex:1;">✅ Selesai, Teruskan</button>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
 
-        wrapper.appendChild(cartDiv);
-        wrapper.appendChild(btnsContainer);
-        wrapper.appendChild(finishDiv);
+        // --- SUSUNAN ELEMEN DALAM WRAPPER ---
         
+        // 1. Cart (Paling Atas)
+        wrapper.appendChild(cartDiv);
+        
+        // 2. Butang Pilihan (Saiz)
+        wrapper.appendChild(btnsContainer);
+
+        // 3. GAMBAR CARTA SAIZ (Hanya untuk Step 3) -> Duduk DI BAWAH Butang Saiz
+        if (step === 3) {
+            const imgDiv = document.createElement('div');
+            imgDiv.style.cssText = "margin: 10px 0; text-align: center; width: 100%; max-width: 300px;";
+            imgDiv.innerHTML = `<img src="${SIZE_CHART_URL}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">`;
+            wrapper.appendChild(imgDiv);
+        }
+
+        // 4. Butang Selesai (Paling Bawah - Selepas Gambar)
+        if(step !== 1) {
+            wrapper.appendChild(finishDiv);
+        }
+
         chatBox.insertBefore(wrapper, typingBubble); 
         scrollToBottom();
         
@@ -1096,7 +1149,7 @@ Resit: ${uploadedReceiptUrl.includes('http') ? '✅ Diterima' : '❌ Tiada'}
                 await addMessage(`⚠️ Gagal upload. Kami akan hubungi anda nanti.`, 'bot');
             }
             
-            step = 6; 
+            step = 7; 
             processStep();
         };
     }
@@ -1104,7 +1157,7 @@ Resit: ${uploadedReceiptUrl.includes('http') ? '✅ Diterima' : '❌ Tiada'}
     function skipUpload() {
         document.querySelector('.choice-container-wrapper').remove();
         addMessage("Saya akan bayar kemudian.", 'user');
-        step = 6;
+        step = 7;
         processStep();
     }
 
@@ -1146,30 +1199,6 @@ Resit: ${uploadedReceiptUrl.includes('http') ? '✅ Diterima' : '❌ Tiada'}
     /* =========================================
        API HELPERS
        ========================================= */
-
-    async function fetchQuestions() {
-        try {
-            const res = await fetch(CSV_QUESTION_URL);
-            const csvText = await res.text();
-            
-            const lines = csvText.split('\n').filter(line => line.trim() !== '');
-            if (lines.length < 2) throw new Error("Tiada data");
-            
-            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-            
-            return lines.slice(1).map(line => {
-                const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-                const cleanValues = values.map(val => val.trim().replace(/"/g, ''));
-                let obj = {};
-                headers.forEach((h, i) => obj[h] = cleanValues[i] || '');
-                return obj;
-            }).filter(item => item.Field_ID && item.Field_ID.match(/^\d+$/)); 
-
-        } catch(e) { 
-            console.error("CSV Fetch Error:", e);
-            return []; 
-        }
-    }
 
     async function uploadToImgBB(file) {
         const formData = new FormData();
